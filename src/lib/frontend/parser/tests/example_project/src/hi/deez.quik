@@ -1,0 +1,4 @@
+fun nuts() {
+    println("nuts!");
+    0
+}

@@ -21,6 +21,7 @@ pub struct File {
 /// Manages all files involved in the compilation process.
 #[derive(Debug, Default, Clone)]
 pub struct FileStore {
+    pub root_dir: String,
     files: HashMap<usize, File>,
     next_id: usize,
     pub project_metadata: Option<PackageMetadata>,
@@ -30,6 +31,7 @@ impl FileStore {
     /// Creates a new, empty file store.
     pub fn new() -> Self {
         Self {
+            root_dir: String::new(),
             files: HashMap::new(),
             next_id: 0,
             project_metadata: None,
@@ -71,6 +73,9 @@ impl FileStore {
 
         // Add all files in the src directory
         self.add_quik_files_from_dir(&src_dir, &src_dir)?;
+
+        // Set the root directory
+        self.root_dir = project_dir.to_string_lossy().to_string();
 
         Ok(())
     }
