@@ -15,7 +15,7 @@ use quiklang_common::{
                 array_expr::{ArrayExpr, ListArrayExpr},
                 array_index_expr::ArrayIndexExpr,
                 block_expr::BlockExpr,
-                control_expr::{BreakExpr, ContinueExpr, ReturnExpr},
+                control_expr::{BreakExpr, ReturnExpr},
                 field_access_expr::FieldAccessExpr,
                 func_call_expr::FuncCallExpr,
                 if_expr::IfExpr,
