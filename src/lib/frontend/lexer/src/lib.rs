@@ -106,7 +106,7 @@ impl Tokens {
     pub fn not_eof(&self) -> bool {
         self.tokens
             .get(self.index)
-            .map_or(false, |t| t.token != TokenType::EOF)
+            .is_some_and(|t| t.token != TokenType::EOF)
     }
 
     pub fn at(&self) -> &Token {
