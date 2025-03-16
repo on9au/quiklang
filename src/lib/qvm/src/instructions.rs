@@ -453,7 +453,7 @@ pub type OpCode = i32;
 // ];
 
 macro_rules! define_opcodes {
-    ($($name:ident => ($op:expr, $is_test:expr, $set_reg_a:expr, $mode_arg_b:expr, $mode_arg_c:expr, $typ:expr)),* $(,)?) => {
+    ($($name:ident => ($op:expr_2021, $is_test:expr_2021, $set_reg_a:expr_2021, $mode_arg_b:expr_2021, $mode_arg_c:expr_2021, $typ:expr_2021)),* $(,)?) => {
         #[derive(Debug, Copy, Clone, Eq, PartialEq)]
         enum OpArgMode {
             NotUsed,

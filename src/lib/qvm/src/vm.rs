@@ -215,14 +215,14 @@ impl VM {
     // Async API to check if a thread has finished and get the result
     #[inline(always)]
     pub async fn join_thread(&mut self, thread_id: usize) -> Result<(), VMRuntimeError> {
-        if let Some(handle) = self.threads.lock().await.remove(&thread_id) {
+        match self.threads.lock().await.remove(&thread_id) { Some(handle) => {
             handle
                 .await
                 .map_err(|e| VMRuntimeError::ThreadJoinError(thread_id, e))?;
             Ok(())
-        } else {
+        } _ => {
             Err(VMRuntimeError::InvalidThreadId(thread_id))
-        }
+        }}
     }
 
     // API to see if a pointer is a constant pointer
