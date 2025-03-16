@@ -21,9 +21,9 @@ use std::{
 };
 
 use quiklang_common::{
-    data_structs::tokens::{Keyword, Operator, Symbol, TokenType},
-    errors::{lexer::LexerError, parser::ParserError, CompilerError, Span},
     CompilationReport,
+    data_structs::tokens::{Keyword, Operator, Symbol, TokenType},
+    errors::{CompilerError, Span, lexer::LexerError, parser::ParserError},
 };
 
 /// Lexer States
@@ -620,7 +620,7 @@ pub fn tokenize(source_code: &str, file_id: usize, report: &mut CompilationRepor
                         string_info.start_col,
                     ),
                     suggestions: vec![
-                        "You may have forgotten to close the string with '\"'.".to_string()
+                        "You may have forgotten to close the string with '\"'.".to_string(),
                     ],
                 }
                 .into(),
@@ -1143,7 +1143,7 @@ mod tests {
 
     /// Helper function to create a test file and add it to the FileStore.
     fn setup_file_store(source: &str, file_name: &str, file_store: &mut FileStore) -> usize {
-        file_store.add_file(file_name.to_string(), source.to_string())
+        file_store.add_file(file_name.into(), source.to_string())
     }
 
     /// Helper function to assert tokens.

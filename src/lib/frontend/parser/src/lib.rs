@@ -9,9 +9,11 @@ mod tests;
 use std::collections::HashMap;
 
 use quiklang_common::{
+    CompilationReport,
     data_structs::{
         ast::{
             expr::{
+                Expr,
                 array_expr::{ArrayExpr, ListArrayExpr},
                 array_index_expr::ArrayIndexExpr,
                 block_expr::BlockExpr,
@@ -28,7 +30,6 @@ use quiklang_common::{
                     UnaryOperator, UnaryOperatorExpr,
                 },
                 tuple_index_expr::TupleIndexExpr,
-                Expr,
             },
             package_module::{
                 Bin, Const, Enum, EnumField, EnumVariant, Function, Global, Impl, Item, Module,
@@ -44,10 +45,9 @@ use quiklang_common::{
         },
         tokens::{Keyword, Operator, Symbol, TokenType},
     },
-    errors::{parser::ParserError, CompilerError},
-    CompilationReport,
+    errors::{CompilerError, parser::ParserError},
 };
-use quiklang_frontend_lexer::{tokenize, Tokens};
+use quiklang_frontend_lexer::{Tokens, tokenize};
 
 pub struct Parser<'a> {
     // file_store: &'a mut FileStore,
@@ -111,7 +111,7 @@ impl<'a> Parser<'a> {
                 self.compilation_report
                     .add_error(CompilerError::ParserError(ParserError::NoEntryPoint {
                         suggestion: vec![
-                            "Add a Package.toml file to the project directory.".to_string()
+                            "Add a Package.toml file to the project directory.".to_string(),
                         ],
                     }));
                 return None;
@@ -178,7 +178,14 @@ impl<'a> Parser<'a> {
             .unwrap()
             .clone();
         let mut module = Module {
-            name: file.name.split('/').last().unwrap().replace(".quik", ""),
+            name: file
+                .name
+                .to_str()
+                .unwrap()
+                .split('/')
+                .last()
+                .unwrap()
+                .replace(".quik", ""),
             items: vec![],
             submodules: vec![],
         };
@@ -522,38 +529,38 @@ impl<'a> Parser<'a> {
             TokenType::Keyword(Keyword::Bool) => {
                 return Some(ASTType {
                     kind: ASTTypeKind::Primitive(PrimitiveType::Bool),
-                })
+                });
             }
             // Primitive types
             TokenType::Keyword(Keyword::Char) => {
                 return Some(ASTType {
                     kind: ASTTypeKind::Primitive(PrimitiveType::Char),
-                })
+                });
             }
             TokenType::Keyword(Keyword::Integer) => {
                 return Some(ASTType {
                     kind: ASTTypeKind::Primitive(PrimitiveType::Integer),
-                })
+                });
             }
             TokenType::Keyword(Keyword::Float) => {
                 return Some(ASTType {
                     kind: ASTTypeKind::Primitive(PrimitiveType::Float),
-                })
+                });
             }
             TokenType::Keyword(Keyword::String) => {
                 return Some(ASTType {
                     kind: ASTTypeKind::Primitive(PrimitiveType::String),
-                })
+                });
             }
             TokenType::Keyword(Keyword::Void) => {
                 return Some(ASTType {
                     kind: ASTTypeKind::Primitive(PrimitiveType::Void),
-                })
+                });
             }
             TokenType::Keyword(Keyword::Null) => {
                 return Some(ASTType {
                     kind: ASTTypeKind::Primitive(PrimitiveType::Null),
-                })
+                });
             }
             // List Array Type
             TokenType::Keyword(Keyword::List) => {
@@ -605,7 +612,7 @@ impl<'a> Parser<'a> {
             TokenType::Operator(Operator::LogicalNot) => {
                 return Some(ASTType {
                     kind: ASTTypeKind::Primitive(PrimitiveType::Never),
-                })
+                });
             }
             // Unexpected token
             token => {
@@ -763,7 +770,7 @@ impl<'a> Parser<'a> {
                             found: token_type.clone(),
                             span: token.span,
                             suggestion: vec![
-                                "Expected an identifier or '*' after '::'.".to_string()
+                                "Expected an identifier or '*' after '::'.".to_string(),
                             ],
                         }));
                     return None;
@@ -815,7 +822,7 @@ impl<'a> Parser<'a> {
                         .add_error(CompilerError::ParserError(ParserError::MissingSemicolon {
                             span: tokens.at().span,
                             suggestion: vec![
-                                "Add a semicolon to terminate the statement.".to_string()
+                                "Add a semicolon to terminate the statement.".to_string(),
                             ],
                         }));
                 }
@@ -1860,14 +1867,14 @@ impl<'a> Parser<'a> {
         // For brevity, we'll not implement trait parsing here
         tokens.eat(); // Consume 'trait'
         tokens.eat(); // Consume trait name
-                      // Skip the trait body
+        // Skip the trait body
         None
     }
 
     fn parse_module_impl(&mut self, _visibility: Visibility, tokens: &mut Tokens) -> Option<Impl> {
         // For brevity, we'll not implement impl parsing here
         tokens.eat(); // Consume 'impl'
-                      // Skip the impl body
+        // Skip the impl body
         None
     }
 
@@ -2007,14 +2014,30 @@ impl<'a> Parser<'a> {
 
             // Convert module file paths to strings relative to project root
             #[cfg(target_os = "windows")]
-            let module_file_name1 = format!("{}\\{}", self.compilation_report.file_store.root_dir, module_file_path1.to_string_lossy());
+            let module_file_name1 = format!(
+                "{}\\{}",
+                self.compilation_report.file_store.root_dir.display(),
+                module_file_path1.to_string_lossy()
+            );
             #[cfg(target_os = "windows")]
-            let module_file_name2 = format!("{}\\{}", self.compilation_report.file_store.root_dir, module_file_path2.to_string_lossy());
+            let module_file_name2 = format!(
+                "{}\\{}",
+                self.compilation_report.file_store.root_dir.display(),
+                module_file_path2.display()
+            );
 
             #[cfg(not(target_os = "windows"))]
-            let module_file_name1 = format!("{}/{}", self.compilation_report.file_store.root_dir, module_file_path1.to_string_lossy());
+            let module_file_name1 = format!(
+                "{}/{}",
+                self.compilation_report.file_store.root_dir,
+                module_file_path1.to_string_lossy()
+            );
             #[cfg(not(target_os = "windows"))]
-            let module_file_name2 = format!("{}/{}", self.compilation_report.file_store.root_dir, module_file_path2.to_string_lossy());
+            let module_file_name2 = format!(
+                "{}/{}",
+                self.compilation_report.file_store.root_dir,
+                module_file_path2.to_string_lossy()
+            );
 
             // Convert full module file paths to PathBuf
             let module_file_pathbuf1 = std::path::PathBuf::from(&module_file_name1);
@@ -2027,13 +2050,13 @@ impl<'a> Parser<'a> {
             if let Some(file) = self
                 .compilation_report
                 .file_store
-                .get_file_by_name(&module_file_name1)
+                .get_file_by_name(&module_file_pathbuf1)
             {
                 module_file_id = Some(file.id);
             } else if let Some(file) = self
                 .compilation_report
                 .file_store
-                .get_file_by_name(&module_file_name2)
+                .get_file_by_name(&module_file_pathbuf2)
             {
                 module_file_id = Some(file.id);
             } else {
@@ -2044,7 +2067,7 @@ impl<'a> Parser<'a> {
                     let file_id = self
                         .compilation_report
                         .file_store
-                        .add_file(module_file_name1.clone(), source);
+                        .add_file(module_file_pathbuf1, source);
                     module_file_id = Some(file_id);
                 } else if module_file_pathbuf2.exists() {
                     let source = std::fs::read_to_string(&module_file_pathbuf2)
@@ -2052,7 +2075,7 @@ impl<'a> Parser<'a> {
                     let file_id = self
                         .compilation_report
                         .file_store
-                        .add_file(module_file_name2.clone(), source);
+                        .add_file(module_file_pathbuf2, source);
                     module_file_id = Some(file_id);
                 } else {
                     // Error: Module file not found

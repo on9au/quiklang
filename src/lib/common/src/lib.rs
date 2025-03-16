@@ -3,7 +3,7 @@ pub mod errors;
 
 use std::collections::HashMap;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use codespan_reporting::diagnostic::{Diagnostic, Label};
 use codespan_reporting::files::SimpleFiles;
@@ -14,14 +14,14 @@ use errors::{CompilerError, CompilerWarning};
 #[derive(Debug, Clone)]
 pub struct File {
     pub id: usize,
-    pub name: String,   // e.g., "src/main.quik"
+    pub name: PathBuf,  // e.g., "src/main.quik"
     pub source: String, // The actual source code
 }
 
 /// Manages all files involved in the compilation process.
 #[derive(Debug, Default, Clone)]
 pub struct FileStore {
-    pub root_dir: String,
+    pub root_dir: PathBuf,
     files: HashMap<usize, File>,
     next_id: usize,
     pub project_metadata: Option<PackageMetadata>,
@@ -31,7 +31,7 @@ impl FileStore {
     /// Creates a new, empty file store.
     pub fn new() -> Self {
         Self {
-            root_dir: String::new(),
+            root_dir: PathBuf::new(),
             files: HashMap::new(),
             next_id: 0,
             project_metadata: None,
@@ -39,7 +39,7 @@ impl FileStore {
     }
 
     /// Adds a new file to the store and returns its unique ID.
-    pub fn add_file(&mut self, name: String, source: String) -> usize {
+    pub fn add_file(&mut self, name: PathBuf, source: String) -> usize {
         let id = self.next_id;
         self.next_id += 1;
         self.files.insert(id, File { id, name, source });
@@ -52,7 +52,7 @@ impl FileStore {
     }
 
     /// Retrieves a file by its name.
-    pub fn get_file_by_name(&self, name: &str) -> Option<&File> {
+    pub fn get_file_by_name(&self, name: &Path) -> Option<&File> {
         self.files.values().find(|f| f.name == name)
     }
 
@@ -75,7 +75,7 @@ impl FileStore {
         self.add_quik_files_from_dir(&src_dir, &src_dir)?;
 
         // Set the root directory
-        self.root_dir = project_dir.to_string_lossy().to_string();
+        self.root_dir = project_dir.into();
 
         Ok(())
     }
@@ -100,7 +100,7 @@ impl FileStore {
                         let source = fs::read_to_string(&path)?;
                         // Get the relative path from the src directory
                         let relative_path = path.strip_prefix(src_dir).unwrap();
-                        let name = format!("src/{}", relative_path.to_string_lossy());
+                        let name = src_dir.join(relative_path);
                         self.add_file(name, source);
                     }
                 }
@@ -154,7 +154,7 @@ impl CompilationReport {
 
         // Add all files to `SimpleFiles` and map their `file_id`s
         for file in self.file_store.files.values() {
-            let id = files.add(&file.name, &file.source);
+            let id = files.add(file.name.display().to_string(), &file.source);
             file_id_map.insert(file.id, id);
         }
 
@@ -167,11 +167,10 @@ impl CompilationReport {
 
                         if let Some(span) = e.span() {
                             if file_id_map.contains_key(&span.file_id) {
-                                diag = diag.with_labels(vec![Label::primary(
-                                    span.file_id,
-                                    span.start..span.end,
-                                )
-                                .with_message("here")]);
+                                diag = diag.with_labels(vec![
+                                    Label::primary(span.file_id, span.start..span.end)
+                                        .with_message("here"),
+                                ]);
                             } else {
                                 // If file_id is not found in the map, provide a generic label
                                 diag = diag.with_notes(vec!["File ID not recognized.".to_string()]);
@@ -193,11 +192,10 @@ impl CompilationReport {
 
                         if let Some(span) = e.span() {
                             if file_id_map.contains_key(&span.file_id) {
-                                diag = diag.with_labels(vec![Label::primary(
-                                    span.file_id,
-                                    span.start..span.end,
-                                )
-                                .with_message("here")]);
+                                diag = diag.with_labels(vec![
+                                    Label::primary(span.file_id, span.start..span.end)
+                                        .with_message("here"),
+                                ]);
                             } else {
                                 // If file_id is not found in the map, provide a generic label
                                 diag = diag.with_notes(vec!["File ID not recognized.".to_string()]);
