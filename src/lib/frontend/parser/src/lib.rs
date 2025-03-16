@@ -2012,36 +2012,36 @@ impl<'a> Parser<'a> {
             let module_file_path1 = current_dir.join(format!("{}.quik", name));
             let module_file_path2 = current_dir.join(&name).join("mod.quik");
 
-            // Convert module file paths to strings relative to project root
-            #[cfg(target_os = "windows")]
-            let module_file_name1 = format!(
-                "{}\\{}",
-                self.compilation_report.file_store.root_dir.display(),
-                module_file_path1.to_string_lossy()
-            );
-            #[cfg(target_os = "windows")]
-            let module_file_name2 = format!(
-                "{}\\{}",
-                self.compilation_report.file_store.root_dir.display(),
-                module_file_path2.display()
-            );
+            // // Convert module file paths to strings relative to project root
+            // #[cfg(target_os = "windows")]
+            // let module_file_name1 = format!(
+            //     "{}\\{}",
+            //     self.compilation_report.file_store.root_dir.display(),
+            //     module_file_path1.to_string_lossy()
+            // );
+            // #[cfg(target_os = "windows")]
+            // let module_file_name2 = format!(
+            //     "{}\\{}",
+            //     self.compilation_report.file_store.root_dir.display(),
+            //     module_file_path2.display()
+            // );
 
-            #[cfg(not(target_os = "windows"))]
-            let module_file_name1 = format!(
-                "{}/{}",
-                self.compilation_report.file_store.root_dir,
-                module_file_path1.to_string_lossy()
-            );
-            #[cfg(not(target_os = "windows"))]
-            let module_file_name2 = format!(
-                "{}/{}",
-                self.compilation_report.file_store.root_dir,
-                module_file_path2.to_string_lossy()
-            );
+            // #[cfg(not(target_os = "windows"))]
+            // let module_file_name1 = format!(
+            //     "{}/{}",
+            //     self.compilation_report.file_store.root_dir,
+            //     module_file_path1.to_string_lossy()
+            // );
+            // #[cfg(not(target_os = "windows"))]
+            // let module_file_name2 = format!(
+            //     "{}/{}",
+            //     self.compilation_report.file_store.root_dir,
+            //     module_file_path2.to_string_lossy()
+            // );
 
-            // Convert full module file paths to PathBuf
-            let module_file_pathbuf1 = std::path::PathBuf::from(&module_file_name1);
-            let module_file_pathbuf2 = std::path::PathBuf::from(&module_file_name2);
+            // // Convert full module file paths to PathBuf
+            // let module_file_pathbuf1 = std::path::PathBuf::from(&module_file_name1);
+            // let module_file_pathbuf2 = std::path::PathBuf::from(&module_file_name2);
 
             // Check if module file exists in file store
             #[allow(unused_assignments)] // Assigning `module_file_id` in the `if` block
@@ -2050,32 +2050,32 @@ impl<'a> Parser<'a> {
             if let Some(file) = self
                 .compilation_report
                 .file_store
-                .get_file_by_name(&module_file_pathbuf1)
+                .get_file_by_name(&module_file_path1)
             {
                 module_file_id = Some(file.id);
             } else if let Some(file) = self
                 .compilation_report
                 .file_store
-                .get_file_by_name(&module_file_pathbuf2)
+                .get_file_by_name(&module_file_path2)
             {
                 module_file_id = Some(file.id);
             } else {
                 // Try to load the file from the filesystem
-                if module_file_pathbuf1.exists() {
-                    let source = std::fs::read_to_string(&module_file_pathbuf1)
+                if module_file_path1.exists() {
+                    let source = std::fs::read_to_string(&module_file_path1)
                         .expect("Failed to read module file");
                     let file_id = self
                         .compilation_report
                         .file_store
-                        .add_file(module_file_pathbuf1, source);
+                        .add_file(module_file_path1, source);
                     module_file_id = Some(file_id);
-                } else if module_file_pathbuf2.exists() {
-                    let source = std::fs::read_to_string(&module_file_pathbuf2)
+                } else if module_file_path2.exists() {
+                    let source = std::fs::read_to_string(&module_file_path2)
                         .expect("Failed to read module file");
                     let file_id = self
                         .compilation_report
                         .file_store
-                        .add_file(module_file_pathbuf2, source);
+                        .add_file(module_file_path2, source);
                     module_file_id = Some(file_id);
                 } else {
                     // Error: Module file not found
@@ -2085,7 +2085,8 @@ impl<'a> Parser<'a> {
                             span: name_span, // Use the cloned `name_span`
                             suggestion: vec![format!(
                                 "Expected module file at {} or {}",
-                                module_file_name1, module_file_name2
+                                module_file_path1.display(),
+                                module_file_path2.display()
                             )],
                         }));
                     return None;
