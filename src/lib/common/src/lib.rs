@@ -153,7 +153,7 @@ impl CompilationReport {
         let mut file_id_map = std::collections::HashMap::new();
 
         // Add all files to `SimpleFiles` and map their `file_id`s
-        for (i, file) in self.file_store.files.values().enumerate() {
+        for file in self.file_store.files.values() {
             let id = files.add(file.name.display().to_string(), &file.source);
             file_id_map.insert(file.id, id);
         }
