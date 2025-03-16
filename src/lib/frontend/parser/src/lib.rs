@@ -2084,9 +2084,9 @@ impl<'a> Parser<'a> {
                             module_name: name.clone(),
                             span: name_span, // Use the cloned `name_span`
                             suggestion: vec![format!(
-                                "Expected module file at {} or {}",
+                                "Expected module file at {} or {}.",
                                 module_file_path1.display(),
-                                module_file_path2.display()
+                                module_file_path2.display(),
                             )],
                         }));
                     return None;

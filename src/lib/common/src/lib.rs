@@ -153,8 +153,15 @@ impl CompilationReport {
         let mut file_id_map = std::collections::HashMap::new();
 
         // Add all files to `SimpleFiles` and map their `file_id`s
-        for file in self.file_store.files.values() {
+        for (i, file) in self.file_store.files.values().enumerate() {
             let id = files.add(file.name.display().to_string(), &file.source);
+            println!(
+                "i: {}, file.id: {}, id: {}, file_name: {}",
+                i,
+                file.id,
+                id,
+                file.name.display()
+            );
             file_id_map.insert(file.id, id);
         }
 
@@ -168,8 +175,11 @@ impl CompilationReport {
                         if let Some(span) = e.span() {
                             if file_id_map.contains_key(&span.file_id) {
                                 diag = diag.with_labels(vec![
-                                    Label::primary(span.file_id, span.start..span.end)
-                                        .with_message("here"),
+                                    Label::primary(
+                                        file_id_map[&span.file_id],
+                                        span.start..span.end,
+                                    )
+                                    .with_message("here"),
                                 ]);
                             } else {
                                 // If file_id is not found in the map, provide a generic label
@@ -193,8 +203,11 @@ impl CompilationReport {
                         if let Some(span) = e.span() {
                             if file_id_map.contains_key(&span.file_id) {
                                 diag = diag.with_labels(vec![
-                                    Label::primary(span.file_id, span.start..span.end)
-                                        .with_message("here"),
+                                    Label::primary(
+                                        file_id_map[&span.file_id],
+                                        span.start..span.end,
+                                    )
+                                    .with_message("here"),
                                 ]);
                             } else {
                                 // If file_id is not found in the map, provide a generic label
