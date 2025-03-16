@@ -155,13 +155,6 @@ impl CompilationReport {
         // Add all files to `SimpleFiles` and map their `file_id`s
         for (i, file) in self.file_store.files.values().enumerate() {
             let id = files.add(file.name.display().to_string(), &file.source);
-            println!(
-                "i: {}, file.id: {}, id: {}, file_name: {}",
-                i,
-                file.id,
-                id,
-                file.name.display()
-            );
             file_id_map.insert(file.id, id);
         }
 
