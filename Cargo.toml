@@ -59,8 +59,8 @@ members = [
     # General Utils (General utilities)
     "src/lib/utils",
     # Build Utils (Utilities for building)
-    "src/lib/build-utils", 
-    
+    "src/lib/build-utils",
+
     # ============================== Common ==============================
 
     # Common (Common utilities like data structures, errors, etc.)
@@ -116,7 +116,7 @@ lazy_static = "1.5.0"
 libloading = "0.8.5"
 
 # Error handling
-thiserror = "1.0.65"
+thiserror = "2.0.12"
 codespan-reporting = "0.11.1"
 
 # TOML
